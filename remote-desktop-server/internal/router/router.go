@@ -32,16 +32,11 @@ func NewRouter(deps *dependency.AppDependencies) *chi.Mux {
 
 	route.Route("/auth", authRouterGroup)
 	route.Route("/api", func(api chi.Router) {
-		// Публичный маршрут получения списка комнат
-		api.Get("/v1/rooms", dependencies.RoomHandler.GetRooms(dependencies.WSServer))
 		// Приватные маршруты (требуют аутентификации)
 		api.Route("/v1", func(v1 chi.Router) {
 			v1.Use(middleware.AuthMiddleware(deps)) // Middleware аутентификации
-
 			// Группы маршрутов:
-			v1.Route("/rooms", roomsRouterGroup)   // Управление комнатами
-			v1.Route("/users", usersRouterGroup)   // Работа с пользователями
-			v1.Route("/scores", scoresRouterGroup) // Управление результатами игр
+			v1.Route("/users", usersRouterGroup) // Работа с пользователями
 		})
 	})
 

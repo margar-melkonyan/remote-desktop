@@ -3,7 +3,6 @@
     <v-layout class="d-flex justify-center">
       <v-app-bar>
         <v-container
-          max-width="800"
           class="justify-center"
         >
           <v-col
@@ -38,29 +37,6 @@
                     <v-list-item-title>
                       {{ auth.user?.name }} / {{ auth.user?.email }}
                     </v-list-item-title>
-                    <v-list-item-subtitle class="d-flex justify-end my-2">
-                      {{ $t('navbar.auth.won', [auth.user?.current_won_score]) }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title>
-                      <v-tooltip
-                        text="Статистика за последние 50 игр"
-                        location="bottom"
-                      >
-                        <template #activator="{ props }">
-                          <v-btn
-                            v-bind="props"
-                            block
-                            color="green"
-                            variant="tonal"
-                            @click="openStatistic"
-                          >
-                            {{ $t('statistics.open') }}
-                          </v-btn>
-                        </template>
-                      </v-tooltip>
-                    </v-list-item-title>
                   </v-list-item>
                   <v-divider class="my-4" />
                   <v-list-item>
@@ -81,7 +57,7 @@
         </v-container>
       </v-app-bar>
       <v-main>
-        <v-container max-width="800">
+        <v-container>
           <router-view @open-login-dialog="openLoginDialog" />
         </v-container>
       </v-main>
@@ -92,18 +68,6 @@
     :login-dialog="loginDialog"
     @close="loginDialog = false"
   />
-  <v-dialog
-    v-model="statisticDialog"
-    origin="left center"
-    max-width="500"
-    max-height="500"
-    scrollable
-    persistent
-  >
-    <UserStatistic
-      @close-dialog="statisticDialog = false"
-    />
-  </v-dialog>
 </template>
 
 <script lang="ts" setup>

@@ -1,1 +1,0 @@
-ALTER TABLE scores DROP COLUMN name;

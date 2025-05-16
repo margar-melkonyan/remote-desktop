@@ -8,22 +8,10 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
-    ChooseSplashScreen: typeof import('./components/game/splashes/ChooseSplashScreen.vue')['default']
-    CreateRoomDialog: typeof import('./components/room/CreateRoomDialog.vue')['default']
     FormDialog: typeof import('./components/auth/FormDialog.vue')['default']
-    GameBoardComponent: typeof import('./components/game/GameBoardComponent.vue')['default']
-    GameControlsComponent: typeof import('./components/game/GameControlsComponent.vue')['default']
-    GameResultComponent: typeof import('./components/game/GameResultComponent.vue')['default']
-    HeaderComponent: typeof import('./components/game/HeaderComponent.vue')['default']
-    MainGameComponent: typeof import('./components/game/MainGameComponent.vue')['default']
-    PrivatePasswordInput: typeof import('./components/game/PrivatePasswordInput.vue')['default']
-    RoomCard: typeof import('./components/room/RoomCard.vue')['default']
-    RoomList: typeof import('./components/room/RoomList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SignInForm: typeof import('./components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./components/auth/SignUpForm.vue')['default']
-    UserStatistic: typeof import('./components/scores/UserStatistic.vue')['default']
-    WaitSplashScreen: typeof import('./components/game/splashes/WaitSplashScreen.vue')['default']
   }
 }

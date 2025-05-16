@@ -1,105 +1,86 @@
 <template>
-  <v-container>
-    <v-row class="pa-0 mt-6">
-      <v-col cols="6">
-        <div class="text-h5">
-          {{ $t('rooms.title') }}
-        </div>
-      </v-col>
-      <v-col
-        v-if="auth.user !== null"
-        class="d-flex justify-end"
-        cols="6"
-      >
-        <v-btn @click="openCreateRoomDialog">
-          {{ $t('rooms.create') }}
-        </v-btn>
-      </v-col>
-    </v-row>
+  <v-container
+    max-width="800"
+    max-height="100vh"
+  >
     <v-row>
       <v-col cols="12">
-        <v-tabs
-          v-if="auth.user !== null"
-          color="#ff7fea"
-          fixed-tabs
+        <v-card
+          elevation="12"
+          rounded="xl"
         >
-          <v-tab
-            fixed
-            @click="changeTab('all')"
+          <v-img
+            height="200"
+            cover
+            gradient="to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5)"
           >
-            {{ $t('rooms.all') }}
-          </v-tab>
-          <v-tab
-            fixed
-            @click="changeTab('my')"
-          >
-            {{ $t('rooms.my') }}
-          </v-tab>
-        </v-tabs>
+            <v-card-title
+              class="text-h3 font-weight-bold text-white pt-12"
+              style="
+                word-break: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                line-height: 1.2;
+              "
+            >
+              Добро пожаловать в RemoteDesktop
+            </v-card-title>
+          </v-img>
+
+          <v-card-text class="pa-6">
+            <v-list lines="two">
+              <v-list-item
+                v-for="(feature, i) in features"
+                :key="i"
+                :prepend-icon="feature.icon"
+              >
+                <template #title>
+                  <span class="font-weight-bold">{{ feature.title }}</span>
+                </template>
+                {{ feature.description }}
+              </v-list-item>
+            </v-list>
+
+            <v-divider class="my-4" />
+
+            <div class="text-center mt-6">
+              <v-btn
+                class="px-8"
+                color="primary"
+                size="large"
+                rounded="lg"
+                @click="startSession"
+              >
+                <v-icon start>mdi-remote-desktop</v-icon>
+                Начать подключение
+              </v-btn>
+            </div>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
-    <v-divider class="my-8" />
-    <RoomList
-      class="my-8"
-      :rooms="rooms"
-      @open-login-dialog="openLoginDialog"
-    />
-    <v-divider class="my-4" />
-    <CreateRoomDialog
-      ref="newRoomDialog"
-      @close-room-create-dialog="fetchRooms"
-    />
   </v-container>
 </template>
 
 <script lang="ts" setup>
-import type CreateRoomDialog from "@/components/room/CreateRoomDialog.vue";
-import {ref} from "vue";
-import {useAuthStore} from "@/stores/auth";
-import axios from "axios";
-const {proxy} = getCurrentInstance();
+import { useRouter } from 'vue-router'
 
-const auth = useAuthStore();
-const apiRooms = proxy.$api.rooms;
-const newRoomDialog = ref<InstanceType<typeof CreateRoomDialog> | null>(null);
-const rooms = ref([]);
-const currentTab = ref<string>("all")
-let intervalId: number;
-const emit = defineEmits([
-  'openLoginDialog'
-])
-const openLoginDialog = () => {
-  emit('openLoginDialog')
-}
-const openCreateRoomDialog = () => {
-  if (newRoomDialog.value) {
-    newRoomDialog.value.createRoom();
+const router = useRouter()
+
+const features = [
+  {
+    icon: 'mdi-shield-check',
+    title: 'Безопасное подключение',
+    description: 'Все соединения защищены 256-битным шифрованием'
+  },
+  {
+    icon: 'mdi-devices',
+    title: 'Доступ с любых устройств',
+    description: 'Работает на компьютерах, планшетах и смартфонах'
   }
-};
-const fetchRooms = () => {
-  let url;
-  switch (currentTab.value) {
-    case "all":
-      url = apiRooms.urls.rooms();
-      break;
-    case "my":
-      url = apiRooms.urls.my();
-      break;
-  }
-  axios.get(url)
-    .then(({data}) => {
-      rooms.value = data.data ?? []
-    })
+]
+
+const startSession = () => {
+  router.push('/connect')
 }
-const changeTab = (tab: string) => {
-  currentTab.value = tab
-  fetchRooms()
-}
-onMounted(() => {
-  intervalId = setInterval(fetchRooms, 2000)
-  fetchRooms()
-})
-onBeforeUnmount(() => {
-  clearInterval(intervalId)
-})
 </script>

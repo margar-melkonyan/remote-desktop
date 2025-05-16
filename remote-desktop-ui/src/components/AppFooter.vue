@@ -13,7 +13,7 @@
       >
         &copy;
         <span>
-          TicTacToe Game By
+          RemoteDesktop GateWay By
           <a
             target="_blank"
             href="https://github.com/margar-melkonyan"

@@ -13,8 +13,7 @@ import (
 // GlobalRepositories содержит все интерфейсы репозиториев, используемые в приложении.
 // Служит контейнером для зависимостей слоя доступа к данным.
 type GlobalRepositories struct {
-	UserRepository  repository.UserRepository  // Репозиторий для операций с пользователями
-	ScoreRepository repository.ScoreRepository // Репозиторий для работы с игровыми рекордами
+	UserRepository repository.UserRepository // Репозиторий для операций с пользователями
 }
 
 // AppDependencies содержит все зависимости приложения:
@@ -27,11 +26,8 @@ type GlobalRepositories struct {
 //   - Внедрения зависимостей между слоями
 //   - Предоставления единой точки доступа к сервисам
 type AppDependencies struct {
-	RoomHandler  http_handler.RoomHandler
-	ScoreHandler http_handler.ScoreHandler
-	UserHandler  http_handler.UserHandler
-	AuthHandler  http_handler.AuthHandler
-	WSServer     *service.WSServer
+	UserHandler http_handler.UserHandler
+	AuthHandler http_handler.AuthHandler
 	GlobalRepositories
 }
 
@@ -60,31 +56,19 @@ func NewAppDependencies() *AppDependencies {
 	}
 
 	// Инициализация репозиториев
-	roomRepo := repository.NewRoomRepository(db)
-	scoreRepo := repository.NewScoreRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	// Инициализация сервисов
-	roomService := service.NewRoomService(roomRepo)
-	scoreService := service.NewScoreService(scoreRepo, userRepo)
-	userService := service.NewUserService(userRepo, scoreRepo)
+	userService := service.NewUserService(userRepo)
 	authService := service.NewAuthService(userRepo)
 	// Создание обработчиков
-	roomHandler := http_handler.NewRoomHandler(*roomService)
-	scoreHandler := http_handler.NewScoreHandler(*scoreService)
 	userHandler := http_handler.NewUserHandler(*userService)
 	authHandler := http_handler.NewAuthHandler(*authService)
 
 	return &AppDependencies{
-		RoomHandler:  *roomHandler,
-		ScoreHandler: *scoreHandler,
-		UserHandler:  *userHandler,
-		AuthHandler:  *authHandler,
-		WSServer: service.NewWsServer(
-			service.NewScoreService(scoreRepo, userRepo),
-		),
+		UserHandler: *userHandler,
+		AuthHandler: *authHandler,
 		GlobalRepositories: GlobalRepositories{
-			UserRepository:  userRepo,
-			ScoreRepository: scoreRepo,
+			UserRepository: userRepo,
 		},
 	}
 }

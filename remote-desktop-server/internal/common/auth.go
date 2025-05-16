@@ -59,14 +59,10 @@ type User struct {
 //   - ID: уникальный идентификатор
 //   - Name: имя пользователя
 //   - Email: электронная почта (может быть опущена)
-//   - WonScore: количество побед (может быть опущено)
-//   - Symbol: символ игрока (X/O, может быть опущен)
 //   - CreatedAt: дата создания аккаунта (может быть опущена)
 type UserResponse struct {
 	ID        uuid.UUID  `json:"id"`
 	Name      string     `json:"name"`
 	Email     string     `json:"email,omitempty"`
-	WonScore  *uint      `json:"current_won_score,omitempty"`
-	Symbol    string     `json:"symbol,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 }

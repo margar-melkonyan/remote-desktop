@@ -11,15 +11,13 @@ import (
 
 // UserService предоставляет методы для получения информации о пользователе.
 type UserService struct {
-	userRepo  repository.UserRepository
-	scoreRepo repository.ScoreRepository
+	userRepo repository.UserRepository
 }
 
 // NewUserService создаёт новый экземпляр UserService.
-func NewUserService(userRepo repository.UserRepository, scoreRepo repository.ScoreRepository) *UserService {
+func NewUserService(userRepo repository.UserRepository) *UserService {
 	return &UserService{
-		userRepo:  userRepo,
-		scoreRepo: scoreRepo,
+		userRepo: userRepo,
 	}
 }
 
@@ -33,16 +31,11 @@ func (service *UserService) GetCurrentUser(ctx context.Context) (*common.UserRes
 	if err != nil {
 		return nil, err
 	}
-	currentWonScore, err := service.scoreRepo.GetWonScore(ctx, user)
-	if err != nil {
-		return nil, err
-	}
 	userResponse := &common.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: &user.CreatedAt,
-		WonScore:  &currentWonScore,
 	}
 	return userResponse, nil
 }
