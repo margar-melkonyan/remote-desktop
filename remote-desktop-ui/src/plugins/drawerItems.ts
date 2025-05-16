@@ -1,7 +1,7 @@
 export const drawerItems = [
   {
     title: "Главная",
-    icon: "",
+    icon: "mdi-remote-desktop",
     routeName: "index",
   },
   {

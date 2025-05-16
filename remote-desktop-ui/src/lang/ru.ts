@@ -1,4 +1,7 @@
 export default {
+  app:{
+    title: 'RemoteDesktop',
+  },
   enterForm: {
     sign_in: 'Войти',
     sign_up: 'Зарегистрироваться',
