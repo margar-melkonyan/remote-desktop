@@ -23,7 +23,7 @@
                 line-height: 1.2;
               "
             >
-              Добро пожаловать в RemoteDesktop
+              {{ $t('index.welcome') }}
             </v-card-title>
           </v-img>
 
@@ -52,7 +52,7 @@
                 @click="startSession"
               >
                 <v-icon start>mdi-remote-desktop</v-icon>
-                Начать подключение
+                {{ $t('index.start_connection') }}
               </v-btn>
             </div>
           </v-card-text>
@@ -63,24 +63,38 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+import { useI18n } from 'vue-i18n';
 
-const router = useRouter()
+const { t } = useI18n();
+const router = useRouter();
+const auth = useAuthStore();
+const emit = defineEmits([
+  'openLoginDialog',
+]);
+
 
 const features = [
   {
     icon: 'mdi-shield-check',
-    title: 'Безопасное подключение',
-    description: 'Все соединения защищены 256-битным шифрованием'
+    title: t('index.features.title_1'),
+    description: t('index.features.description_1')
   },
   {
     icon: 'mdi-devices',
-    title: 'Доступ с любых устройств',
-    description: 'Работает на компьютерах, планшетах и смартфонах'
+    title: t('index.features.title_2'),
+    description: t('index.features.description_2')
   }
 ]
 
 const startSession = () => {
-  router.push('/connect')
+  if(auth?.user == null) {
+    emit('openLoginDialog');
+    return;
+  }
+  router.push({
+    name: 'new-connection'
+  })
 }
 </script>

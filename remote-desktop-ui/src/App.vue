@@ -56,6 +56,20 @@
           </v-col>
         </v-container>
       </v-app-bar>
+      <v-navigation-drawer v-if="auth?.user">
+        <v-col
+          class="pa-0 my-10"
+        >
+          <v-list-item
+            v-for="(item,key) in drawerItems"
+            :key="`drawer-item-${key}`"
+            class="my-2"
+            :title="item.title"
+            :prepend-icon="item.icon"
+            @click="moveTo(item.routeName)"
+          />
+        </v-col>
+      </v-navigation-drawer>
       <v-main>
         <v-container>
           <router-view @open-login-dialog="openLoginDialog" />
@@ -74,20 +88,22 @@
 import AppFooter from './components/AppFooter.vue';
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { drawerItems } from "@/plugins/drawerItems";
 
 const router = useRouter();
 const auth = useAuthStore();
 const loginDialog = ref(false)
-const statisticDialog = ref(false);
 auth.currentUser()
 const openLoginDialog = () => {
   loginDialog.value = true;
 }
-const openStatistic = () => {
-  statisticDialog.value = true
-}
 const signOut = () => {
   auth.signOut()
   router.push({name: "index"})
+}
+const moveTo = (routeName) => {
+  router.push({
+    name: routeName,
+  })
 }
 </script>

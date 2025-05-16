@@ -5,8 +5,6 @@
  */
 
 // Composables
-import Index from '@/pages/index.vue'
-import Room from '@/pages/room.vue'
 import { createRouter, createWebHistory } from 'vue-router/auto'
 // import { setupLayouts } from 'virtual:generated-layouts'
 
@@ -17,13 +15,13 @@ const routes = [
     component: () => import('@/pages/index.vue')
   },
   {
-    path: '/rooms/:id',
-    name: 'rooms.game',
-    component:Room,
-    props: (route: any) => ({
-      room: route.params.room
-    })
-  }
+    path: '/new-connection',
+    name: 'new-connection'
+  },
+  {
+    path: '/sessions',
+    name: 'sessions'
+  },
 ]
 
 const router = createRouter({
