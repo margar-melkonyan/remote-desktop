@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16.1
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./tic-tac-toe-server/Dockerfile
+    ports:
+      - "${SERVER_IP}:${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "echo 'Waiting for PostgreSQL to be ready...';
+      psql -h postgres -U $${DB_USERNAME} -d $${DB_NAME} -c 'SELECT 1'
+      echo 'Running migrations...';
+      migrate -path /app/internal/schema -database \"$${DATABASE_URL}\" up;
+      echo 'Starting application...';
+      exec ./tic-tac-toe-server"    
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./tic-tac-toe-game-ui/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "${SERVER_IP}:${VITE_PORT}:80"
+
+volumes:
+  postgres_data:
