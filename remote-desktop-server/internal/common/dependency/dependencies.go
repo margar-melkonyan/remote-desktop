@@ -26,8 +26,9 @@ type GlobalRepositories struct {
 //   - Внедрения зависимостей между слоями
 //   - Предоставления единой точки доступа к сервисам
 type AppDependencies struct {
-	UserHandler http_handler.UserHandler
-	AuthHandler http_handler.AuthHandler
+	UserHandler    http_handler.UserHandler
+	AuthHandler    http_handler.AuthHandler
+	SessionHandler http_handler.SessionHandler
 	GlobalRepositories
 }
 
@@ -60,13 +61,16 @@ func NewAppDependencies() *AppDependencies {
 	// Инициализация сервисов
 	userService := service.NewUserService(userRepo)
 	authService := service.NewAuthService(userRepo)
+	sessionService := service.NewSessionService(userRepo)
 	// Создание обработчиков
 	userHandler := http_handler.NewUserHandler(*userService)
 	authHandler := http_handler.NewAuthHandler(*authService)
+	sessionHandler := http_handler.NewSessionHandler(*sessionService)
 
 	return &AppDependencies{
-		UserHandler: *userHandler,
-		AuthHandler: *authHandler,
+		UserHandler:    *userHandler,
+		AuthHandler:    *authHandler,
+		SessionHandler: *sessionHandler,
 		GlobalRepositories: GlobalRepositories{
 			UserRepository: userRepo,
 		},

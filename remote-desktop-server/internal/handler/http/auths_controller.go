@@ -1,4 +1,4 @@
-// Package http_handler предоставляет HTTP обработчики для API игры "Крестики-нолики".
+// Package http_handler предоставляет HTTP обработчики для API RemoteDesktop.
 package http_handler
 
 import (

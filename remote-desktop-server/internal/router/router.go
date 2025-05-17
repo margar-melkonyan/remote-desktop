@@ -36,7 +36,8 @@ func NewRouter(deps *dependency.AppDependencies) *chi.Mux {
 		api.Route("/v1", func(v1 chi.Router) {
 			v1.Use(middleware.AuthMiddleware(deps)) // Middleware аутентификации
 			// Группы маршрутов:
-			v1.Route("/users", usersRouterGroup) // Работа с пользователями
+			v1.Route("/users", usersRouterGroup)       // Работа с пользователями
+			v1.Route("/sessions", sessionsRouterGroup) // Работа c сессиями
 		})
 	})
 
