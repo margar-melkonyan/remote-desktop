@@ -94,7 +94,7 @@ const items = [
 ];
 
 const submit = () => {
-  console.log('test')
+  console.log('')
 }
 
 </script>
