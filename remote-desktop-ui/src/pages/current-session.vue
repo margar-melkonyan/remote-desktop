@@ -107,7 +107,7 @@ const getDisplayDimensions = () => {
 onMounted(() => {
   if (!displayRef.value) return
   const guacID = router.currentRoute.value.params.id;
-  const token = '6102C6084CEB1C546E54904D257E1F4ABF217B23B58B2B6E381BA4FC21A9E63E';
+  const token = 'F6E5C9B51723602798236E4DDD67551B2AF35509811337E49A2D2AAB06AA9768';
   const { width, height } = getDisplayDimensions();
   tunnel = new Guacamole.WebSocketTunnel(
     `ws://192.168.1.4:8080/guacamole/websocket-tunnel?token=${token}&GUAC_DATA_SOURCE=postgresql&GUAC_ID=${guacID}&GUAC_TYPE=c&GUAC_WIDTH=${width}&GUAC_HEIGHT=${height}&GUAC_DPI=96&GUAC_TIMEZONE=Europe/Moscow&GUAC_AUDIO=audio/L8&GUAC_AUDIO=audio/L16&GUAC_IMAGE=image/jpeg&GUAC_IMAGE=image/png&GUAC_IMAGE=image/webp`

@@ -34,19 +34,25 @@
           {{ $t('sessions.rdp') }}
         </v-tab>
       </v-tabs>
-      <v-row class="mt-10">
-        <v-col v-if="sessions.length > 0" />
-        <v-col
-          v-else
-          cols="12"
-        >
-          <v-row class="d-flex justify-center">
-            <span class="text-h6">
-              {{ $t('sessions.no_connections', [currentTab.toUpperCase()]) }}
-            </span>
-          </v-row>
-        </v-col>
-      </v-row>
+    </v-row>
+    <v-row class="mt-10">
+      <v-col v-if="sessions.length > 0">
+        <SessionCard
+          v-for="(session, key) in sessions"
+          :key="`session-card-${key}`"
+          :session="session"
+        />
+      </v-col>
+      <v-col
+        v-else
+        cols="12"
+      >
+        <v-row class="d-flex justify-center">
+          <span class="text-h6">
+            {{ $t('sessions.no_connections', [currentTab.toUpperCase()]) }}
+          </span>
+        </v-row>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -57,6 +63,10 @@ const currentTab = ref<string>('all');
 const sessions = [];
 const selectFetchProtocols = () => {
   axios.get(`http://localhost:8080/api/v1/protocols?protocol=${currentTab.value}`)
+}
+
+const openConnection = () => {
+
 }
 
 watch(currentTab, () => {

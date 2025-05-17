@@ -11,6 +11,7 @@ declare module 'vue' {
     FormDialog: typeof import('./components/auth/FormDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SessionCard: typeof import('./components/session/SessionCard.vue')['default']
     SignInForm: typeof import('./components/auth/SignInForm.vue')['default']
     SignUpForm: typeof import('./components/auth/SignUpForm.vue')['default']
   }

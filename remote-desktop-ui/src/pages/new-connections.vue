@@ -5,6 +5,7 @@
     <v-form @submit.prevent="submit">
       <v-card
         class="ma-8"
+        rounded="xl"
         :loading="form.busy"
       >
         <v-card-text>
@@ -59,6 +60,7 @@
           <v-btn
             color="blue"
             variant="flat"
+            rounded="lg"
             block
           >
             {{ $t('new_connections.add_connection') }}
