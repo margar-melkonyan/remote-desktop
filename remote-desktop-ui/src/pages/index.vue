@@ -1,7 +1,7 @@
 <template>
   <v-container
     max-width="800"
-    max-height="100vh"
+    class="mt-10"
   >
     <v-row>
       <v-col cols="12">

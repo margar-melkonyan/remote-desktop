@@ -87,9 +87,7 @@
         </v-col>
       </v-navigation-drawer>
       <v-main>
-        <v-container>
-          <router-view @open-login-dialog="openLoginDialog" />
-        </v-container>
+        <router-view @open-login-dialog="openLoginDialog" />
       </v-main>
       <AppFooter />
     </v-layout>

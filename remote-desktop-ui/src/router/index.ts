@@ -6,6 +6,7 @@
 
 // Composables
 import { createRouter, createWebHistory } from 'vue-router/auto'
+import {useAuthStore} from "@/stores/auth";
 // import { setupLayouts } from 'virtual:generated-layouts'
 
 const routes = [
@@ -16,18 +17,37 @@ const routes = [
   },
   {
     path: '/new-connection',
-    name: 'new-connection'
+    name: 'new-connection',
+    component: () => import('@/pages/new-connections.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/sessions',
     name: 'sessions',
-    component: () => import('@/pages/sessions.vue')
+    component: () => import('@/pages/sessions.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/sessions/:id',
+    name: 'current-session',
+    component: () => import('@/pages/current-session.vue'),
+    meta: { requiresAuth: true }
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  if (to.meta.requiresAuth && !auth.user) {
+    next('/')
+  } else {
+    next()
+  }
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804

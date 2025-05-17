@@ -2,6 +2,16 @@ export default {
   app:{
     title: 'RemoteDesktop',
   },
+  new_connections: {
+    name: "Название соеденения",
+    description: "Описание",
+    hostname: "IP/Hostname",
+    port: "Порт",
+    username: "Имя пользователя",
+    password: "Пароль",
+    protocol: "Протокол",
+    add_connection: "Добавить соединение"
+  },
   enterForm: {
     sign_in: 'Войти',
     sign_up: 'Зарегистрироваться',
