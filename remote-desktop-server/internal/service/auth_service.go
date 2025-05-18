@@ -3,8 +3,15 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -17,19 +24,25 @@ import (
 
 // AuthService предоставляет сервис для работы с аутентификацией пользователей.
 type AuthService struct {
-	repo repository.UserRepository
+	repoAuth      repository.UserRepository
+	repoGuacamole repository.GuacamoleRepository
 }
 
 // NewAuthService создает новый экземпляр AuthService.
 //
 // Параметры:
-//   - repoRoom: репозиторий для работы с пользователями
+//   - repoAuth: репозиторий для работы с пользователями
+//   - repoGuacamole: репозиторий для работы с Guacamole
 //
 // Возвращает:
 //   - *AuthService: указатель на созданный сервис
-func NewAuthService(repoRoom repository.UserRepository) *AuthService {
+func NewAuthService(
+	repoAuth repository.UserRepository,
+	repoGuacamole repository.GuacamoleRepository,
+) *AuthService {
 	return &AuthService{
-		repo: repoRoom,
+		repoAuth:      repoAuth,
+		repoGuacamole: repoGuacamole,
 	}
 }
 
@@ -73,7 +86,7 @@ func CheckTokenIsNotExpired(token string) (*Claims, error) {
 //   - "user not found" - пользователь не найден
 //   - ошибки генерации токена
 func (service *AuthService) SignIn(ctx context.Context, form common.AuthSignInRequest) (map[string]string, error) {
-	currentUser, err := service.repo.FindByEmail(ctx, form.Email)
+	currentUser, err := service.repoAuth.FindByEmail(ctx, form.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +99,13 @@ func (service *AuthService) SignIn(ctx context.Context, form common.AuthSignInRe
 		return nil, err
 	}
 
+	guacToken, err := getGuacamoleToken(form)
+	if err != nil {
+		return nil, err
+	}
 	return map[string]string{
-		"token": accessToken,
+		"token":      accessToken,
+		"guac_token": guacToken,
 	}, nil
 }
 
@@ -103,8 +121,25 @@ func (service *AuthService) SignIn(ctx context.Context, form common.AuthSignInRe
 //   - ошибки хеширования пароля
 //   - ошибки создания пользователя
 func (service *AuthService) SignUp(ctx context.Context, form common.AuthSignUpRequest) error {
-	if _, err := service.repo.FindByEmail(ctx, form.Email); err == nil {
+	if _, err := service.repoAuth.FindByEmail(ctx, form.Email); err == nil {
 		return errors.New("user with this email already exists")
+	}
+	id, err := service.repoGuacamole.CreateEntity(ctx, form.Email)
+	if err != nil {
+		return err
+	}
+	saultHex := getGuacamoleSault()
+	hashedGuacamolePasswordHex := getHashedGuacamolePassword(form.Password, saultHex)
+	err = service.repoGuacamole.CreateUserAndPermissions(ctx, common.GuacamoleUser{
+		ID:          id,
+		PasswordHex: hashedGuacamolePasswordHex,
+		SaultHex:    saultHex,
+		Permissions: []string{
+			"CREATE_CONNECTION",
+		},
+	})
+	if err != nil {
+		return err
 	}
 	password, err := bcrypt.GenerateFromPassword(
 		[]byte(strings.TrimSpace(form.Password)),
@@ -114,7 +149,8 @@ func (service *AuthService) SignUp(ctx context.Context, form common.AuthSignUpRe
 		return err
 	}
 	form.Password = string(password)
-	return service.repo.Create(ctx, form)
+
+	return service.repoAuth.Create(ctx, form)
 }
 
 // getToken генерирует JWT токен для пользователя.
@@ -178,4 +214,50 @@ func parseToken(token string) (*Claims, error) {
 	}
 
 	return &claims, nil
+}
+
+func getGuacamoleSault() string {
+	salt := make([]byte, 32)
+	_, err := rand.Read(salt)
+	if err != nil {
+		panic(err)
+	}
+
+	return strings.ToUpper(hex.EncodeToString(salt))
+}
+
+func getHashedGuacamolePassword(password string, saltHex string) string {
+	saltedPassword := password + saltHex
+	hash := sha256.Sum256([]byte(saltedPassword))
+	return strings.ToUpper(hex.EncodeToString(hash[:]))
+}
+
+func getGuacamoleToken(form common.AuthSignInRequest) (string, error) {
+	formData := url.Values{}
+	formData.Set("username", form.Email)
+	formData.Set("password", form.Password)
+	resp, err := http.Post(
+		config.ServerConfig.GuacamoleAPIURL+"/tokens",
+		"application/x-www-form-urlencoded",
+		strings.NewReader(formData.Encode()),
+	)
+	if err != nil {
+		return "", fmt.Errorf("HTTP request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body: %w", err)
+	}
+	var authResp struct {
+		AuthToken string `json:"authToken"`
+	}
+	if err := json.Unmarshal(body, &authResp); err != nil {
+		return "", fmt.Errorf("failed to parse JSON response: %w", err)
+	}
+
+	return authResp.AuthToken, nil
 }

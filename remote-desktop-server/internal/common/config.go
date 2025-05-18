@@ -36,9 +36,10 @@ type JWTConfig struct {
 //   - DbConfig: конфигурация базы данных
 //   - JWTConfig: конфигурация JWT аутентификации
 type ServerConfig struct {
-	Port        string
-	LogLevel    int8
-	BcryptPower int
-	DbConfig    []*DBConfig
-	JWTConfig   JWTConfig
+	Port            string
+	LogLevel        int8
+	BcryptPower     int
+	DbConfig        []*DBConfig
+	JWTConfig       JWTConfig
+	GuacamoleAPIURL string
 }

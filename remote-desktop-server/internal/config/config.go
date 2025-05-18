@@ -59,6 +59,7 @@ func NewConfig() {
 			AccessTokenSecret: os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
 			AccessTokenTTL:    os.Getenv("JWT_ACCESS_TOKEN_TTL"),
 		},
+		GuacamoleAPIURL: os.Getenv("GUAC_API_URL"),
 	}
 	ServerConfig.DbConfig = append(ServerConfig.DbConfig, &common.DBConfig{
 		Username: os.Getenv("DB_USERNAME"),

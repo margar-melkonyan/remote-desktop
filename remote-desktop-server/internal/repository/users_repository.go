@@ -9,8 +9,8 @@ import (
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
 )
 
-// UserRepo реализует UserRepository для работы с PostgreSQL
-type UserRepo struct {
+// userRepo реализует UserRepository для работы с PostgreSQL
+type userRepo struct {
 	db *sql.DB
 }
 
@@ -25,7 +25,7 @@ type UserRepository interface {
 
 // NewUserRepository создает новый экземпляр UserRepository
 func NewUserRepository(db *sql.DB) UserRepository {
-	return &UserRepo{
+	return &userRepo{
 		db: db,
 	}
 }
@@ -43,7 +43,7 @@ func NewUserRepository(db *sql.DB) UserRepository {
 // Особенности:
 //   - Возвращает только активных пользователей (deleted_at IS NULL)
 //   - Включает в результат: ID, имя, email, хэш пароля и дату создания
-func (repo *UserRepo) FindByEmail(ctx context.Context, email string) (*common.User, error) {
+func (repo *userRepo) FindByEmail(ctx context.Context, email string) (*common.User, error) {
 	var user common.User
 	query := "SELECT id, name, email, password, created_at FROM users WHERE email = $1 AND deleted_at IS NULL"
 	row := repo.db.QueryRowContext(ctx, query, email)
@@ -74,7 +74,7 @@ func (repo *UserRepo) FindByEmail(ctx context.Context, email string) (*common.Us
 //   - Проверяет количество затронутых строк (rowsAffected)
 //   - Возвращает ошибку "room was not created" если запись не была создана
 //     (Примечание: возможно стоит изменить текст ошибки на более подходящий)
-func (repo *UserRepo) Create(ctx context.Context, form common.AuthSignUpRequest) error {
+func (repo *userRepo) Create(ctx context.Context, form common.AuthSignUpRequest) error {
 	query := "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)"
 	result, err := repo.db.ExecContext(
 		ctx,

@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function signIn(form: Form) {
     const { data, status } = await form.post(apiAuth.urls.signIn())
     localStorage.setItem("token", data.data.token)
+    localStorage.setItem("guac_token", data.data.guac_token)
     await currentUser()
     return status
   }
@@ -40,6 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
   function signOut() {
     user.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem("guac_token")
   }
 
   return { user, currentUser, signIn, signUp, signOut }

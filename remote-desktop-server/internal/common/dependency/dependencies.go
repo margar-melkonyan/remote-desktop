@@ -60,7 +60,6 @@ func NewAppDependencies() *AppDependencies {
 		config.ServerConfig.DbConfig[0].Name,
 		config.ServerConfig.DbConfig[0].SSLMode,
 	)
-	fmt.Println(dsn)
 	db, err := store.NewConnection(dsn)
 	if err != nil {
 		slog.With(op, err.Error())
@@ -75,8 +74,7 @@ func NewAppDependencies() *AppDependencies {
 		config.ServerConfig.DbConfig[1].Name,
 		config.ServerConfig.DbConfig[1].SSLMode,
 	)
-	fmt.Println(dsnGuacamole)
-	_, err = store.NewConnection(dsnGuacamole) // dbGUAC
+	dbGuac, err := store.NewConnection(dsnGuacamole) // dbGUAC
 	if err != nil {
 		slog.With(op, err.Error())
 		panic(err)
@@ -84,9 +82,10 @@ func NewAppDependencies() *AppDependencies {
 
 	// Инициализация репозиториев
 	userRepo := repository.NewUserRepository(db)
+	guacRepo := repository.NewGuacamoleRepository(dbGuac)
 	// Инициализация сервисов
 	userService := service.NewUserService(userRepo)
-	authService := service.NewAuthService(userRepo)
+	authService := service.NewAuthService(userRepo, guacRepo)
 	sessionService := service.NewSessionService(userRepo)
 	// Создание обработчиков
 	userHandler := http_handler.NewUserHandler(*userService)
