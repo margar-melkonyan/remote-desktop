@@ -5,9 +5,9 @@ export const drawerItems = [
     routeName: "index",
   },
   {
-    title: "Все сессии",
+    title: "Все подключения",
     icon: "mdi-monitor-multiple",
-    routeName: "sessions",
+    routeName: "connections",
   },
   {
     title: "Новое подключение",

@@ -4,6 +4,7 @@ package http_handler
 import (
 	"net/http"
 
+	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/helper"
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
 )
 
@@ -26,7 +27,27 @@ func NewSessionHandler(service service.SessionService) *SessionHandler {
 }
 
 func (h *SessionHandler) Get(w http.ResponseWriter, r *http.Request) {
-	// TODO: реализовать обработку GET запроса
+	resp := helper.Response{}
+	var protocol string
+	hasProtocol := r.URL.Query().Has("protocol")
+	if hasProtocol {
+		protocol = r.URL.Query().Get("protocol")
+	} else {
+		protocol = "all"
+	}
+	guacToken := r.Header.Get("Guacamole-Token")
+	if guacToken == "" {
+		resp.Message = "Guacamole-Token is required"
+		resp.ResponseWrite(w, r, http.StatusBadRequest)
+		return
+	}
+	data, err := h.service.GetSession(protocol, guacToken)
+	if err != nil {
+		resp.ResponseWrite(w, r, http.StatusNotFound)
+		return
+	}
+	resp.Data = data
+	resp.ResponseWrite(w, r, http.StatusOK)
 }
 
 func (h *SessionHandler) StoreConnection(w http.ResponseWriter, r *http.Request) {

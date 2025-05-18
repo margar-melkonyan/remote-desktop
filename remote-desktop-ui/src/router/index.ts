@@ -22,13 +22,13 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/sessions',
-    name: 'sessions',
-    component: () => import('@/pages/sessions.vue'),
+    path: '/connections',
+    name: 'connections',
+    component: () => import('@/pages/connections.vue'),
     meta: { requiresAuth: true }
   },
   {
-    path: '/sessions/:id',
+    path: '/connections/:id',
     name: 'current-session',
     component: () => import('@/pages/current-session.vue'),
     meta: { requiresAuth: true }

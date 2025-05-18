@@ -1,17 +1,13 @@
 <template>
   <v-card rounded="xl">
     <v-card-title class="mt-2">
-      {{ props.session.connection }} ({{ props.session.hostname }}:{{ props.session.port }})
+      {{ props.session.name }}
     </v-card-title>
-    <v-divider class="my-2" />
-    <v-card-text>
-      ({{ props.session.description }})
-    </v-card-text>
     <v-divider class="my-2" />
     <v-card-actions>
       <v-row class="d-flex justify-space-between px-5 my-2">
         <div class="align-self-center">
-          ({{ props.session.protocol }})
+          {{ $t('connections.protocol', [props.session.protocol]) }}
         </div>
         <v-btn
           color="blue"
@@ -19,7 +15,7 @@
           rounded="lg"
           @click="openConnection"
         >
-          {{ $t('sessions.connect') }}
+          {{ $t('connections.connect') }}
         </v-btn>
       </v-row>
     </v-card-actions>
@@ -27,13 +23,18 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+const router = useRouter();
+
 const props = defineProps({
   session: {
+    identifier: String,
     connection: String,
-    hostname: String,
-    port: Number,
-    description: String,
     protocol: String,
   }
 })
+
+const openConnection = () => {
+  router.push({ name:  'current-session', params: {id: props.session.identifier} })
+}
 </script>

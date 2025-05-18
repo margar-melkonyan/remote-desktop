@@ -10,4 +10,24 @@ type GuacamoleUser struct {
 	Permissions []string `json:"permissions"`
 }
 
-// [{"op":"add","path":"/systemPermissions","value":"CREATE_CONNECTION"}]
+type Parameters struct {
+	HostName   string `json:"hostname"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	IgnoreCert string `json:"ignore-cert"`
+	Port       string `json:"port"`
+}
+
+type GuacamoleRDConnectionRequest struct {
+	Id               string `json:"identifier"`
+	Name             string `json:"name"`
+	Protocol         string `json:"protocol"`
+	ParentIdentifier string `json:"parentIdentifier"` // default ROOT
+	Parameters
+}
+
+type GuacamoleRDConnectionResponse struct {
+	ID       string `json:"identifier"`
+	Name     string `json:"name"`
+	Protocol string `json:"protocol"`
+}

@@ -2,12 +2,13 @@ export default {
   app:{
     title: 'RemoteDesktop',
   },
-  sessions: {
-    title: 'Все сессии',
+  connections: {
+    protocol: 'По протоколу: ({0})',
+    title: 'Все подключения',
     all: 'Все',
     rdp: 'RDP',
     ssh: 'SSH',
-    no_connections: 'У вас на данный момент нет, подключенный с удаленнымыми устройствами по протоколу {0}.',
+    no: 'У вас на данный момент нет, подключенный с удаленнымыми устройствами по протоколу {0}.',
     connect: 'Подключиться',
   },
   new_connections: {
