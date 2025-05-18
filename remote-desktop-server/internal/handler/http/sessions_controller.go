@@ -29,6 +29,14 @@ func (h *SessionHandler) Get(w http.ResponseWriter, r *http.Request) {
 	// TODO: реализовать обработку GET запроса
 }
 
-func (h *SessionHandler) AddNewConnection(w http.ResponseWriter, r *http.Request) {
+func (h *SessionHandler) StoreConnection(w http.ResponseWriter, r *http.Request) {
 	// TODO: реализовать обработку POST запроса
+}
+
+func (h *SessionHandler) UpdateConnection(w http.ResponseWriter, r *http.Request) {
+	// TODO: реализовать обработку PUT запроса
+}
+
+func (h *SessionHandler) RemoveConnection(w http.ResponseWriter, r *http.Request) {
+	// TODO: реализовать обработку DELETE запроса
 }

@@ -39,6 +39,6 @@ type ServerConfig struct {
 	Port        string
 	LogLevel    int8
 	BcryptPower int
-	DbConfig    DBConfig
+	DbConfig    []*DBConfig
 	JWTConfig   JWTConfig
 }

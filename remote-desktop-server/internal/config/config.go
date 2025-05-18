@@ -54,17 +54,26 @@ func NewConfig() {
 		Port:        os.Getenv("SERVER_PORT"),
 		LogLevel:    int8(logLevel),
 		BcryptPower: int(bcryptPower),
-		DbConfig: common.DBConfig{
-			Username: os.Getenv("DB_USERNAME"),
-			Password: os.Getenv("DB_PASSWORD"),
-			Host:     os.Getenv("DB_HOST"),
-			Name:     os.Getenv("DB_NAME"),
-			Port:     os.Getenv("DB_PORT"),
-			SSLMode:  os.Getenv("DB_SSLMODE"),
-		},
+		DbConfig:    make([]*common.DBConfig, 0),
 		JWTConfig: common.JWTConfig{
 			AccessTokenSecret: os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
 			AccessTokenTTL:    os.Getenv("JWT_ACCESS_TOKEN_TTL"),
 		},
 	}
+	ServerConfig.DbConfig = append(ServerConfig.DbConfig, &common.DBConfig{
+		Username: os.Getenv("DB_USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
+		Host:     os.Getenv("DB_HOST"),
+		Name:     os.Getenv("DB_NAME"),
+		Port:     os.Getenv("DB_PORT"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+	})
+	ServerConfig.DbConfig = append(ServerConfig.DbConfig, &common.DBConfig{
+		Username: os.Getenv("DB_GUAC_USERNAME"),
+		Password: os.Getenv("DB_GUAC_PASSWORD"),
+		Host:     os.Getenv("DB_GUAC_HOST"),
+		Name:     os.Getenv("DB_GUAC_NAME"),
+		Port:     os.Getenv("DB_GUAC_PORT"),
+		SSLMode:  os.Getenv("DB_GUAC_SSLMODE"),
+	})
 }

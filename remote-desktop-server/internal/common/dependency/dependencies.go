@@ -2,8 +2,10 @@
 package dependency
 
 import (
+	"fmt"
 	"log/slog"
 
+	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
 	http_handler "github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/handler/http"
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/repository"
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
@@ -50,7 +52,31 @@ func NewAppDependencies() *AppDependencies {
 	store := postgres.Storage{
 		ConnectionDriver: "postgres",
 	}
-	db, err := store.NewConnection()
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		config.ServerConfig.DbConfig[0].Host,
+		config.ServerConfig.DbConfig[0].Port,
+		config.ServerConfig.DbConfig[0].Username,
+		config.ServerConfig.DbConfig[0].Password,
+		config.ServerConfig.DbConfig[0].Name,
+		config.ServerConfig.DbConfig[0].SSLMode,
+	)
+	fmt.Println(dsn)
+	db, err := store.NewConnection(dsn)
+	if err != nil {
+		slog.With(op, err.Error())
+		panic(err)
+	}
+
+	dsnGuacamole := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		config.ServerConfig.DbConfig[1].Host,
+		config.ServerConfig.DbConfig[1].Port,
+		config.ServerConfig.DbConfig[1].Username,
+		config.ServerConfig.DbConfig[1].Password,
+		config.ServerConfig.DbConfig[1].Name,
+		config.ServerConfig.DbConfig[1].SSLMode,
+	)
+	fmt.Println(dsnGuacamole)
+	_, err = store.NewConnection(dsnGuacamole) // dbGUAC
 	if err != nil {
 		slog.With(op, err.Error())
 		panic(err)

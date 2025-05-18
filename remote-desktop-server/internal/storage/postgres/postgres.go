@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
 )
 
 type Storage struct {
@@ -34,15 +33,7 @@ type Storage struct {
 // Возможные ошибки:
 //   - "the application cannot open connection with %s" - ошибка открытия соединения
 //   - "the application cannot connect to the database" - ошибка проверки соединения
-func (stroage *Storage) NewConnection() (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		config.ServerConfig.DbConfig.Host,
-		config.ServerConfig.DbConfig.Port,
-		config.ServerConfig.DbConfig.Username,
-		config.ServerConfig.DbConfig.Password,
-		config.ServerConfig.DbConfig.Name,
-		config.ServerConfig.DbConfig.SSLMode,
-	)
+func (stroage *Storage) NewConnection(dsn string) (*sql.DB, error) {
 	db, err := sql.Open(stroage.ConnectionDriver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf(
