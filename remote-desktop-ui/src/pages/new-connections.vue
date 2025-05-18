@@ -73,11 +73,11 @@
 
 <script setup lang="ts">
 
-import {Form} from "vform";
+import { Form } from "vform";
 
 const form = ref(new Form({
   name: '',
-  protocol: '',
+  protocol: 'ssh',
   username: '',
   password: '',
   hostname: '',
@@ -86,7 +86,7 @@ const form = ref(new Form({
 
 const items = [
   {
-    name: 'SSH',
+    name: 'SSH', // Дефолтное значение для protocol-a
     value: 'ssh'
   },
   {

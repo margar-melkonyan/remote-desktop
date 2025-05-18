@@ -1,47 +1,141 @@
+networks:
+  guacnetwork_compose:
+    driver: bridge
+
 services:
   postgres:
     image: postgres:16.1
     ports:
       - "${DB_PORT}:5432"
     environment:
+      PGDATA: /var/lib/postgresql/data/${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  backend:
-    build:
-      context: .
-      dockerfile: ./tic-tac-toe-server/Dockerfile
-    ports:
-      - "${SERVER_IP}:${SERVER_PORT}:${SERVER_PORT}"
-    environment:
-      DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+  guacd:
+    container_name: guacd_compose
+    image: guacamole/guacd
+    networks:
+      - guacnetwork_compose
+    restart: always
     depends_on:
-      postgres:
-        condition: service_healthy
-    command: >
-      sh -c "echo 'Waiting for PostgreSQL to be ready...';
-      psql -h postgres -U $${DB_USERNAME} -d $${DB_NAME} -c 'SELECT 1'
-      echo 'Running migrations...';
-      migrate -path /app/internal/schema -database \"$${DATABASE_URL}\" up;
-      echo 'Starting application...';
-      exec ./tic-tac-toe-server"    
+      - postgres
 
-  frontend:
-    build:
-      context: .
-      dockerfile: ./tic-tac-toe-game-ui/Dockerfile
+  init-guacamole-db:
+    image: guacamole/guacamole
+    user: root
+    entrypoint: sh -c "
+      mkdir -p /shared && 
+      chmod 777 /shared && 
+      /opt/guacamole/bin/initdb.sh --postgresql > /shared/initdb.sql"
+    volumes:
+      - shared_guac_init:/shared
+    networks:
+      - guacnetwork_compose
+
+  # postgres
+  postgres_guac:
+    container_name: postgres_guacamole_compose
+    environment:
+      PGDATA: /var/lib/postgresql/data/guacamole
+      POSTGRES_DB: ${DB_GUAC_NAME}
+      POSTGRES_PASSWORD: ${DB_GUAC_PASSWORD}
+      POSTGRES_USER: ${DB_GUAC_USERNAME}
+    image: postgres:15.2-alpine
     depends_on:
-      - backend
+      - init-guacamole-db
     ports:
-      - "${SERVER_IP}:${VITE_PORT}:80"
+      - '${DB_GUAC_PORT}:5432'
+    networks:
+      - guacnetwork_compose
+    restart: always
+    volumes:
+      - postgres_guacamole_data:/var/lib/postgresql/data:Z
+      - shared_guac_init:/docker-entrypoint-initdb.d:ro
+
+
+  # guacamole
+  guacamole:
+    container_name: guacamole_compose
+    group_add:
+      - "1000"
+    depends_on:
+      - guacd
+    environment:
+      POSTGRES_HOSTNAME: postgres_guac
+      POSTGRES_DATABASE: ${DB_GUAC_NAME}
+      POSTGRES_PASSWORD: ${DB_GUAC_PASSWORD}
+      POSTGRES_USER: ${DB_GUAC_USERNAME}
+      GUACD_HOSTNAME: guacd
+      RECORDING_SEARCH_PATH: /record
+      GUACAMOLE_PROPERTIES: |
+        enable-connection-history: true
+        enable-user-tracking: true
+        char-encoding: UTF-8
+        allowed-languages: en,ru,ja,zh
+    command: >
+      sh -c "
+        /opt/guacamole/bin/initdb.sh --postgresql > /shared/initdb.sql;
+        /opt/guacamole/bin/start.sh
+      "
+    image: guacamole/guacamole
+    volumes:
+      - shared_guac_init:/shared
+    networks:
+      - guacnetwork_compose
+    restart: always
+
+
+  nginx:
+    container_name: nginx_guacamole_compose
+    image: nginx:alpine
+    ports:
+      - "${SERVER_IP}:8080:80/tcp"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - guacnetwork_compose
+    depends_on:
+      - guacamole
+    restart: always
+
+  # backend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./tic-tac-toe-server/Dockerfile
+  #   ports:
+  #     - "${SERVER_IP}:${SERVER_PORT}:${SERVER_PORT}"
+  #   environment:
+  #     DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   command: >
+  #     sh -c "echo 'Waiting for PostgreSQL to be ready...';
+  #     psql -h postgres -U $${DB_USERNAME} -d $${DB_NAME} -c 'SELECT 1'
+  #     echo 'Running migrations...';
+  #     migrate -path /app/internal/schema -database \"$${DATABASE_URL}\" up;
+  #     echo 'Starting application...';
+  #     exec ./tic-tac-toe-server"    
+
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./tic-tac-toe-game-ui/Dockerfile
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "${SERVER_IP}:${VITE_PORT}:80"
 
 volumes:
   postgres_data:
+  postgres_guacamole_data:
+  shared_guac_init:
