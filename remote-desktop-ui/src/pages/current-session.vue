@@ -1,46 +1,76 @@
 <template>
-  <div class="d-flex justify-center wrapper ma-4 rounded-4">
-    <div
-      ref="displayRef"
-      class="guacamole-display"
-      tabindex="0"
-      @contextmenu.prevent
-    />
-    <div class="d-flex align-self-center">
-      <v-card
+  <div class="wrapper ma-4 rounded-4">
+    <!-- Основной контейнер с относительным позиционированием -->
+    <div class="position-relative" style="height: 100vh">
+      <!-- Guacamole дисплей -->
+      <div
+        ref="displayRef"
+        class="guacamole-display"
+        tabindex="0"
+        @contextmenu.prevent
+      />
+
+      <!-- Оверлей с v-card -->
+      <div
         v-if="connectionState !== 1"
-        max-height="175"
-        width="500"
-        rounded="xl"
+        class="position-absolute"
+        style="
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 1000;
+        "
       >
-        <v-row v-if="connectionState === 0" class="d-flex justify-center my-6">
-          <v-progress-circular
-            color="primary"
-            indeterminate
-            :size="56"
-            :width="7"
-          />
-        </v-row>
-        <span v-if="errorText != ''">
-          <v-card-title>
-            <span style="color: red"> {{ $t("connections.caution") }} </span>
-          </v-card-title>
-          <v-card-text style="color: grey">
-            <span v-html="errorText" />
-          </v-card-text>
-        </span>
-        <v-card-actions>
-          <v-btn
-            color="blue"
-            variant="flat"
-            block
-            rounded="xl"
-            @click="router.push({ name: 'connections' })"
+        <v-card max-height="175" width="500" rounded="xl">
+          <v-row
+            v-if="connectionState === 0"
+            class="d-flex justify-center my-6"
           >
-            {{ $t("back") }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+            <v-progress-circular
+              color="primary"
+              indeterminate
+              :size="56"
+              :width="7"
+            />
+          </v-row>
+          <span v-if="errorText != ''">
+            <v-card-title>
+              <span style="color: red"> {{ $t("connections.caution") }} </span>
+            </v-card-title>
+            <v-card-text style="color: grey">
+              <span v-html="errorText" />
+            </v-card-text>
+          </span>
+          <v-card-actions>
+            <v-row>
+              <v-col>
+                <v-btn
+                  color="blue"
+                  variant="flat"
+                  block
+                  rounded="xl"
+                  @click="router.push({ name: 'connections' })"
+                  prepend-icon="mdi-arrow-left"
+                >
+                  {{ $t("back") }}
+                </v-btn>
+              </v-col>
+              <v-col>
+                <v-btn
+                  color="blue"
+                  variant="flat"
+                  block
+                  rounded="xl"
+                  @click="runConnection"
+                  prepend-icon="mdi-refresh"
+                >
+                  {{ $t("connections.reconnect") }}
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </div>
     </div>
   </div>
 </template>
@@ -58,6 +88,11 @@ const errorCode = ref("");
 const connectionState = ref(0);
 let client: Guacamole.Client = null;
 let tunnel: Guacamole.Tunnel = null;
+
+const eventHandlers = {
+  keydown: null as ((e: KeyboardEvent) => void) | null,
+  keyup: null as ((e: KeyboardEvent) => void) | null,
+};
 
 const keyMap = {
   Enter: 0xff0d,
@@ -144,19 +179,51 @@ const initMouse = () => {
 };
 
 const getDisplayDimensions = () => {
+  if (!displayRef.value) return { width: 800, height: 600 }; // значения по умолчанию
   const rect = document.querySelector(".wrapper").getBoundingClientRect();
+  console.log();
   return {
     width: Math.floor(rect.width * 0.9),
     height: Math.floor(rect.height * 0.9),
   };
 };
 
-onMounted(() => {
+function cleanupConnection() {
+  // Удаляем обработчики клавиатуры
+  if (displayRef.value) {
+    if (eventHandlers.keydown) {
+      displayRef.value.removeEventListener("keydown", eventHandlers.keydown);
+    }
+    if (eventHandlers.keyup) {
+      displayRef.value.removeEventListener("keyup", eventHandlers.keyup);
+    }
+  }
+
+  // Очищаем мышь
+  if (guacMouse) {
+    guacMouse.onmousedown = guacMouse.onmousemove = guacMouse.onmouseup = null;
+    guacMouse = null;
+  }
+
+  // Удаляем дисплей
+  if (displayRef.value?.firstChild) {
+    displayRef.value.removeChild(displayRef.value.firstChild);
+  }
+
+  // Отключаем клиент и туннель
+  client?.disconnect();
+  tunnel?.disconnect();
+  client = null;
+  tunnel = null;
+}
+
+function runConnection() {
   if (!displayRef.value) return;
+  cleanupConnection();
   const guacID = router.currentRoute.value.params.id;
   const token = window.localStorage.getItem("guac_token");
   const { width, height } = getDisplayDimensions();
-
+  console.log("Display dimensions:", width, height); // Для отладки
   const websocketUrl =
     `ws://192.168.1.4:8080/guacamole/websocket-tunnel` +
     `?token=${token}` +
@@ -174,7 +241,6 @@ onMounted(() => {
     `&GUAC_IMAGE=image/webp`;
 
   tunnel = new Guacamole.WebSocketTunnel(websocketUrl);
-
   client = new Guacamole.Client(tunnel);
 
   client.onerror = (error) => {
@@ -206,8 +272,7 @@ onMounted(() => {
 
       case Guacamole.Tunnel.State.CLOSED:
         console.log("Туннель: закрыт.");
-        errorText.value =
-          "Соединение закрыто.<br>Не удалось подключиться!<br>Проверьте введенные данные для подключения";
+        errorText.value = "Соединение закрыто.";
         break;
 
       case Guacamole.Tunnel.State.UNSTABLE:
@@ -217,37 +282,60 @@ onMounted(() => {
     }
   };
 
+  eventHandlers.keydown = (e) => handleKeyEvent(e, 1);
+  eventHandlers.keyup = (e) => handleKeyEvent(e, 0);
   const options = { passive: false };
-  displayRef.value.addEventListener(
-    "keydown",
-    (e) => handleKeyEvent(e, 1),
-    options,
-  );
-  displayRef.value.addEventListener(
-    "keyup",
-    (e) => handleKeyEvent(e, 0),
-    options,
-  );
+  displayRef.value.addEventListener("keydown", eventHandlers.keydown, options);
+  displayRef.value.addEventListener("keyup", eventHandlers.keyup, options);
 
   initMouse();
+
+  setTimeout(() => {
+    if (client) {
+      client.sendSize(width, height);
+    }
+  }, 300);
+}
+
+const handleResize = () => {
+  if (client && displayRef.value) {
+    const { width, height } = getDisplayDimensions();
+    client.sendSize(width, height);
+  }
+};
+
+onMounted(() => {
+  runConnection();
   displayRef.value.focus();
+  window.addEventListener("resize", handleResize);
 });
 
 onUnmounted(() => {
   if (client) client.disconnect();
   if (tunnel) tunnel.disconnect();
+  window.removeEventListener("resize", handleResize);
 });
 </script>
 
 <style>
+.wrapper {
+  position: relative;
+  height: calc(100vh - 32px); /* учитываем margin */
+}
+
 .guacamole-display {
-  height: 100vh;
-  /* font-family: monospace; */
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #000;
   user-select: none;
   -webkit-user-select: none;
   outline: none;
   cursor: none;
 }
+
 .guacamole-display:nth-child(1) {
   display: flex;
   justify-content: center;
