@@ -3,6 +3,7 @@ export default {
     title: "RemoteDesktop",
   },
   connections: {
+    edit: "Редактировать соединение",
     caution: "Предупреждение",
     protocol: "По протоколу: ({0})",
     title: "Все подключения",

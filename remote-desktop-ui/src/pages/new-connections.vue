@@ -1,7 +1,11 @@
 <template>
   <v-container max-width="800">
     <v-form @submit.prevent="submit">
-      <v-card class="ma-8" rounded="xl" :loading="form.busy">
+      <v-card
+        class="ma-8"
+        rounded="xl"
+        :loading="form.busy"
+      >
         <v-card-text>
           <v-text-field
             v-model="form.name"
@@ -15,7 +19,7 @@
             v-model="form.protocol"
             class="my-4"
             hide-details="auto"
-            :items="items"
+            :items="connectionItems"
             item-value="value"
             item-title="name"
             :label="$t('new_connections.protocol')"
@@ -57,7 +61,14 @@
           />
         </v-card-text>
         <v-card-actions class="my-2 mx-2">
-          <v-btn type="submit" color="blue" variant="flat" rounded="lg" block :loading="form.busy">
+          <v-btn
+            type="submit"
+            color="blue"
+            variant="flat"
+            rounded="lg"
+            block
+            :loading="form.busy"
+          >
             {{ $t("new_connections.add_connection") }}
           </v-btn>
         </v-card-actions>
@@ -69,7 +80,7 @@
 <script setup lang="ts">
 import { Form } from "vform";
 import { getCurrentInstance } from 'vue';
-
+import { connectionItems } from "@/plugins/common";
 const { proxy } = getCurrentInstance();
 const apiSessions = proxy.$api.sessions;
 const router = useRouter();
@@ -84,17 +95,6 @@ const form = ref(
     port: "",
   }),
 );
-
-const items = [
-  {
-    name: "SSH", // Дефолтное значение для protocol-a
-    value: "ssh",
-  },
-  {
-    name: "RDP",
-    value: "rdp",
-  },
-];
 
 const submit = () => {
   form.value.post(apiSessions.urls.store(), {

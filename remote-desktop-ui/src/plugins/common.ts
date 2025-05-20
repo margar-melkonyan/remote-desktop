@@ -15,3 +15,14 @@ export const drawerItems = [
     routeName: "new-connection",
   },
 ]
+
+export const connectionItems = [
+  {
+    name: "SSH", // Дефолтное значение для protocol-a
+    value: "ssh",
+  },
+  {
+    name: "RDP",
+    value: "rdp",
+  },
+];

@@ -24,7 +24,7 @@
               icon="mdi-pencil"
               color="primary"
               size="small"
-              @click="sendEdit"
+              @click="emit('editConnection', props.session.identifier)"
             />
             <v-btn
               icon="mdi-trash-can"
@@ -105,7 +105,7 @@ import {useRouter} from "vue-router";
 import {getCurrentInstance} from "vue";
 import axios from "axios";
 
-const {proxy} = getCurrentInstance();
+const { proxy } = getCurrentInstance();
 const apiSessions = proxy.$api.sessions;
 const confirmationDialog = ref(false);
 const router = useRouter();
@@ -119,7 +119,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-  'updateConnections'
+  'updateConnections',
+  'editConnection'
 ])
 
 const openConnection = () => {
@@ -142,13 +143,5 @@ const confirmDeletion = () => {
       confirmationDialog.value = false;
       emit('updateConnections')
     });
-}
-
-const sendEdit = () => {
-  axios.get(apiSessions.urls.edit(props.session.identifier), {
-    headers: {
-      "Guacamole-Token": localStorage.getItem("guac_token"),
-    },
-  })
 }
 </script>

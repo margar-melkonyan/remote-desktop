@@ -102,7 +102,7 @@
 import AppFooter from './components/AppFooter.vue';
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
-import { drawerItems } from "@/plugins/drawerItems";
+import { drawerItems } from "@/plugins/common";
 
 const router = useRouter();
 const auth = useAuthStore();
