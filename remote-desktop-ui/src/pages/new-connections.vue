@@ -12,6 +12,7 @@
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.name')"
+            clearable
             :variant="'outlined'"
             :error-messages="form.errors.get('name')"
           />
@@ -32,6 +33,7 @@
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.username')"
+            clearable
             :variant="'outlined'"
             :error-messages="form.errors.get('username')"
           />
@@ -40,14 +42,19 @@
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.password')"
+            clearable
             :variant="'outlined'"
             :error-messages="form.errors.get('password')"
+            :append-inner-icon="isHiddePassword ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="isHiddePassword ? 'password' : 'text'"
+            @click:append-inner="showPassword"
           />
           <v-text-field
             v-model="form.host_name"
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.hostname')"
+            clearable
             :variant="'outlined'"
             :error-messages="form.errors.get('host_name')"
           />
@@ -56,6 +63,7 @@
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.port')"
+            clearable
             :variant="'outlined'"
             :error-messages="form.errors.get('port')"
           />
@@ -84,7 +92,7 @@ import { connectionItems } from "@/plugins/common";
 const { proxy } = getCurrentInstance();
 const apiSessions = proxy.$api.sessions;
 const router = useRouter();
-
+const isHiddePassword = ref(true);
 const form = ref(
   new Form({
     host_name: "",
@@ -95,6 +103,10 @@ const form = ref(
     port: "",
   }),
 );
+
+const showPassword = () => {
+  isHiddePassword.value = !isHiddePassword.value
+}
 
 const submit = () => {
   form.value.post(apiSessions.urls.store(), {

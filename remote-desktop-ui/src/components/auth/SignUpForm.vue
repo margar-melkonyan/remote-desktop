@@ -7,6 +7,7 @@
         variant="outlined"
         :label="$t('enterForm.name')"
         :error-messages="form.errors.get('name')"
+        clearable
       />
     </v-col>
     <v-col>
@@ -16,6 +17,7 @@
         variant="outlined"
         :label="$t('enterForm.email')"
         :error-messages="form.errors.get('email')"
+        clearable
       />
     </v-col>
     <v-col>
@@ -25,6 +27,7 @@
         variant="outlined"
         :label="$t('enterForm.password')"
         :error-messages="form.errors.get('password')"
+        clearable
         :append-inner-icon="isHiddePassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="isHiddePassword ? 'password' : 'text'"
         @click:append-inner="showPassword"
@@ -37,6 +40,7 @@
         variant="outlined"
         :label="$t('enterForm.password_confirmation')"
         :error-messages="form.errors.get('password_confirmation')"
+        clearable
         :append-inner-icon="isHiddePassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="isHiddePassword ? 'password' : 'text'"
         @click:append-inner="showPassword"

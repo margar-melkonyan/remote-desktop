@@ -7,6 +7,7 @@
         variant="outlined"
         :error-messages="form.errors.get('email')"
         :label="$t('enterForm.email')"
+        clearable
       />
     </v-col>
     <v-col>
@@ -15,6 +16,7 @@
         hide-details="auto"
         variant="outlined"
         :label="$t('enterForm.password')"
+        clearable
         :error-messages="form.errors.get('password')"
         :append-inner-icon="isHiddePassword ? 'mdi-eye' : 'mdi-eye-off'"
         :type="isHiddePassword ? 'password' : 'text'"

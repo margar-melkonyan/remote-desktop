@@ -154,6 +154,43 @@ func (service *SessionService) CreateConnection(form *common.GuacamoleConnection
 	return nil
 }
 
+func (service *SessionService) UpdateConnection(
+	id string,
+	form *common.GuacamoleConnectionRequest,
+	guacToken string,
+) error {
+	ignoreCert := "false"
+	if form.Protocol == rdp {
+		ignoreCert = "true"
+	}
+
+	path := fmt.Sprintf("%s/%s", connectionsURL, id)
+
+	if err := service.makeGuacamoleRequest(
+		http.MethodPut,
+		path,
+		guacToken,
+		common.GuacamoleRDConnectionRequest{
+			Id:               id,
+			Name:             form.Name,
+			Protocol:         form.Protocol,
+			ParentIdentifier: "ROOT",
+			Parameters: common.Parameters{
+				HostName:   form.HostName,
+				Username:   form.Username,
+				Password:   form.Password,
+				IgnoreCert: ignoreCert,
+				Port:       form.Port,
+			},
+		},
+		nil,
+	); err != nil {
+		return fmt.Errorf("failed to create connection: %w", err)
+	}
+
+	return nil
+}
+
 func (service *SessionService) DestroyConnection(id string, guacToken string) error {
 	path := fmt.Sprintf("%s/%s", connectionsURL, id)
 

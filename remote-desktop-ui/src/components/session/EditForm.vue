@@ -15,6 +15,7 @@
         :label="$t('new_connections.name')"
         :variant="'outlined'"
         :error-messages="form.errors.get('name')"
+        clearable
       />
       <v-select
         v-model="form.protocol"
@@ -33,6 +34,7 @@
         class="my-4"
         hide-details="auto"
         :label="$t('new_connections.username')"
+        clearable
         :variant="'outlined'"
         :error-messages="form.errors.get('username')"
       />
@@ -41,14 +43,19 @@
         class="my-4"
         hide-details="auto"
         :label="$t('new_connections.password')"
+        clearable
         :variant="'outlined'"
         :error-messages="form.errors.get('password')"
+        :append-inner-icon="isHiddePassword ? 'mdi-eye' : 'mdi-eye-off'"
+        :type="isHiddePassword ? 'password' : 'text'"
+        @click:append-inner="showPassword"
       />
       <v-text-field
         v-model="form.host_name"
         class="my-4"
         hide-details="auto"
         :label="$t('new_connections.hostname')"
+        clearable
         :variant="'outlined'"
         :error-messages="form.errors.get('host_name')"
       />
@@ -57,6 +64,7 @@
         class="my-4"
         hide-details="auto"
         :label="$t('new_connections.port')"
+        clearable
         :variant="'outlined'"
         :error-messages="form.errors.get('port')"
       />
@@ -79,7 +87,7 @@
           color="green"
           variant="tonal"
           rounded="xl"
-          @click=""
+          @click="updateConnection"
         >
           {{ $t('update') }}
         </v-btn>
@@ -91,6 +99,11 @@
 <script setup lang="ts">
 import {connectionItems} from "@/plugins/common";
 import {Form} from "vform";
+import { getCurrentInstance } from "vue";
+const { proxy } = getCurrentInstance();
+const apiSessions = proxy.$api.sessions;
+
+const isHiddePassword = ref(true);
 
 const props = defineProps({
   connectionInfo: {
@@ -118,6 +131,21 @@ const form = ref(
     port: "",
   }),
 );
+
+const showPassword = () => {
+  isHiddePassword.value = !isHiddePassword.value
+}
+
+const updateConnection = () => {
+  form.value.put(apiSessions.urls.update(props.connectionInfo.identifier),{
+    headers: {
+      "Guacamole-Token": window.localStorage.getItem('guac_token')
+    }
+  })
+    .then(() => {
+      emit('close')
+    })
+}
 
 onMounted(() => {
   form.value.fill(props.connectionInfo)
