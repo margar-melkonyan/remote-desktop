@@ -1,13 +1,7 @@
 <template>
-  <v-container
-    max-width="800"
-  >
+  <v-container max-width="800">
     <v-form @submit.prevent="submit">
-      <v-card
-        class="ma-8"
-        rounded="xl"
-        :loading="form.busy"
-      >
+      <v-card class="ma-8" rounded="xl" :loading="form.busy">
         <v-card-text>
           <v-text-field
             v-model="form.name"
@@ -15,6 +9,7 @@
             hide-details="auto"
             :label="$t('new_connections.name')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('name')"
           />
           <v-select
             v-model="form.protocol"
@@ -25,6 +20,7 @@
             item-title="name"
             :label="$t('new_connections.protocol')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('protocol')"
           />
           <v-divider class="my-4" />
           <v-text-field
@@ -33,6 +29,7 @@
             hide-details="auto"
             :label="$t('new_connections.username')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('username')"
           />
           <v-text-field
             v-model="form.password"
@@ -40,13 +37,15 @@
             hide-details="auto"
             :label="$t('new_connections.password')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('password')"
           />
           <v-text-field
-            v-model="form.hostname"
+            v-model="form.host_name"
             class="my-4"
             hide-details="auto"
             :label="$t('new_connections.hostname')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('host_name')"
           />
           <v-text-field
             v-model="form.port"
@@ -54,16 +53,12 @@
             hide-details="auto"
             :label="$t('new_connections.port')"
             :variant="'outlined'"
+            :error-messages="form.errors.get('port')"
           />
         </v-card-text>
         <v-card-actions class="my-2 mx-2">
-          <v-btn
-            color="blue"
-            variant="flat"
-            rounded="lg"
-            block
-          >
-            {{ $t('new_connections.add_connection') }}
+          <v-btn type="submit" color="blue" variant="flat" rounded="lg" block :loading="form.busy">
+            {{ $t("new_connections.add_connection") }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -72,31 +67,42 @@
 </template>
 
 <script setup lang="ts">
-
 import { Form } from "vform";
+import { getCurrentInstance } from 'vue';
 
-const form = ref(new Form({
-  name: '',
-  protocol: 'ssh',
-  username: '',
-  password: '',
-  hostname: '',
-  port: '',
-}))
+const { proxy } = getCurrentInstance();
+const apiSessions = proxy.$api.sessions;
+const router = useRouter();
+
+const form = ref(
+  new Form({
+    host_name: "",
+    name: "",
+    protocol: "ssh",
+    username: "",
+    password: "",
+    port: "",
+  }),
+);
 
 const items = [
   {
-    name: 'SSH', // Дефолтное значение для protocol-a
-    value: 'ssh'
+    name: "SSH", // Дефолтное значение для protocol-a
+    value: "ssh",
   },
   {
-    name: 'RDP',
-    value: 'rdp'
+    name: "RDP",
+    value: "rdp",
   },
 ];
 
 const submit = () => {
-  console.log('')
-}
-
+  form.value.post(apiSessions.urls.store(), {
+    headers: {
+      "Guacamole-Token": localStorage.getItem('guac_token')
+    }
+  }).then(() => {
+    router.push({name: "connections"})
+  })
+};
 </script>

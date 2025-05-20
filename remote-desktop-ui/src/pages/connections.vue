@@ -23,9 +23,9 @@
       <v-col v-if="sessions.length > 0">
         <SessionCard
           v-for="(session, key) in sessions"
-          class="my-4"
           :key="`session-card-${key}`"
           :session="session"
+          @update-connections="selectFetchProtocols"
         />
       </v-col>
       <v-col v-else cols="12">
@@ -41,10 +41,14 @@
 
 <script lang="ts" setup>
 import axios from "axios";
+import { getCurrentInstance } from "vue";
+const { proxy } = getCurrentInstance();
+const apiSessions = proxy.$api.sessions;
+
 const currentTab = ref<string>('all');
 const sessions = ref([]);
 const selectFetchProtocols = () => {
-  axios.get(`http://192.168.1.4:8000/api/v1/sessions?protocol=${currentTab.value}`, {
+  axios.get(`${apiSessions.urls.index()}?protocol=${currentTab.value}`, {
     headers: {
       "Guacamole-Token": window.localStorage.getItem("guac_token"),
     }

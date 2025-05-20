@@ -162,17 +162,17 @@ const handleKeyEvent = (e, pressed) => {
   }
 };
 
-let guacMouse = null;
+const guacMouse = ref({});
 
 const initMouse = () => {
   if (!client || !displayRef.value) return;
 
   const displayElement = client.getDisplay().getElement();
-  guacMouse = new Guacamole.Mouse(displayElement);
+  guacMouse.value = new Guacamole.Mouse(displayElement);
 
-  guacMouse.onmousedown =
-    guacMouse.onmousemove =
-    guacMouse.onmouseup =
+  guacMouse.value.onmousedown =
+    guacMouse.value.onmousemove =
+    guacMouse.value.onmouseup =
       (state) => {
         client.sendMouseState(state, true);
       };
@@ -201,8 +201,11 @@ function cleanupConnection() {
 
   // Очищаем мышь
   if (guacMouse) {
-    guacMouse.onmousedown = guacMouse.onmousemove = guacMouse.onmouseup = null;
-    guacMouse = null;
+    guacMouse.value.onmousedown =
+      guacMouse.value.onmousemove =
+      guacMouse.value.onmouseup =
+        null;
+    guacMouse.value = "";
   }
 
   // Удаляем дисплей

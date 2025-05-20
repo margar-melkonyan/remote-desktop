@@ -10,6 +10,16 @@ type GuacamoleUser struct {
 	Permissions []string `json:"permissions"`
 }
 
+type GuacamoleConnectionRequest struct {
+	Name       string `json:"name" validate:"required,min=4,max=255"`
+	HostName   string `json:"host_name" validate:"required,min=4,max=255"` // ip or url
+	Username   string `json:"username" validate:"required,min=4,max=255"`
+	Password   string `json:"password" validate:"required,min=4,max=255"`
+	IgnoreCert string `json:"-"`
+	Port       string `json:"port" validate:"required,min=2,max=255"`
+	Protocol   string `json:"protocol" validate:"required,min=2,max=255"`
+}
+
 type Parameters struct {
 	HostName   string `json:"hostname"`
 	Username   string `json:"username"`
@@ -18,12 +28,15 @@ type Parameters struct {
 	Port       string `json:"port"`
 }
 
+type Attributes struct{}
+
 type GuacamoleRDConnectionRequest struct {
-	Id               string `json:"identifier"`
+	Id               string `json:"identifier,omitempty"`
 	Name             string `json:"name"`
 	Protocol         string `json:"protocol"`
 	ParentIdentifier string `json:"parentIdentifier"` // default ROOT
-	Parameters
+	Parameters       `json:"parameters"`
+	Attributes       `json:"attributes"`
 }
 
 type GuacamoleRDConnectionResponse struct {
