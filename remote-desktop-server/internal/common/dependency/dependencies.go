@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
-	http_handler "github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/handler/http"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/repository"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/storage/postgres"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/config"
+	http_handler "github.com/margar-melkonyan/remote-desktop.git/internal/handler/http"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/repository"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/service"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/storage/postgres"
 )
 
 // GlobalRepositories содержит все интерфейсы репозиториев, используемые в приложении.
@@ -90,7 +90,7 @@ func NewAppDependencies() *AppDependencies {
 	// Создание обработчиков
 	userHandler := http_handler.NewUserHandler(*userService)
 	authHandler := http_handler.NewAuthHandler(*authService)
-	sessionHandler := http_handler.NewSessionHandler(*sessionService)
+	sessionHandler := http_handler.NewSessionHandler(sessionService)
 
 	return &AppDependencies{
 		UserHandler:    *userHandler,

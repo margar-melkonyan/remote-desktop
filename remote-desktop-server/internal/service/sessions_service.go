@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/config"
 )
 
 // Протоколы подключений, используемые для фильтрации

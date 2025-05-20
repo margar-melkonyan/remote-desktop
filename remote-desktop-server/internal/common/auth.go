@@ -9,9 +9,8 @@ import (
 )
 
 // Константы для ключей контекста:
-const USER_MAIL = "user_mail"   // Ключ для хранения email пользователя в контексте
-const GUAC_TOKEN = "guac_token" // Тоекн для запросов к Apache Guacamole
-const USER = "user"             // Ключ для хранения данных пользователя в контексте
+const USER_MAIL = "user_mail" // Ключ для хранения email пользователя в контексте
+const USER = "user"           // Ключ для хранения данных пользователя в контексте
 
 // AuthSignInRequest представляет структуру запроса для входа пользователя.
 // Поля:

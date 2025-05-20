@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
 )
 
 var ServerConfig *common.ServerConfig

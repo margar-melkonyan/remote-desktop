@@ -2,10 +2,10 @@
 package router
 
 import (
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common/dependency"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/handler/middleware"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common/dependency"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/handler/middleware"
 )
 
 var dependencies *dependency.AppDependencies

@@ -16,9 +16,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/repository"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/config"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 

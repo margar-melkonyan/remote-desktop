@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common/dependency"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/router"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common/dependency"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/config"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/router"
 )
 
 func RunHttpServer() {
@@ -31,7 +31,10 @@ func RunHttpServer() {
 				addr,
 			),
 		)
-		server.ListenAndServe()
+		err := server.ListenAndServe()
+		if err != nil {
+			return
+		}
 	}()
 	<-ctx.Done()
 }

@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
 )
 
 // guacamoleRepo реализует GuacamoleRepository для работы с PostgreSQL

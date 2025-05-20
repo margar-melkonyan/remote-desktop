@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/helper"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/helper"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/service"
 )
 
 // AuthHandler обрабатывает HTTP запросы для аутентификации пользователей.

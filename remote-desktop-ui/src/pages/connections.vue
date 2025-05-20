@@ -59,6 +59,7 @@
     <edit-form
       :connection-info="connectionInfo"
       @close="editDialog = false"
+      @update-connections="selectFetchProtocols"
     />
   </v-dialog>
 </template>

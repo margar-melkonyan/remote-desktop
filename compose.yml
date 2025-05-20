@@ -50,6 +50,11 @@ services:
       POSTGRES_PASSWORD: ${DB_GUAC_PASSWORD}
       POSTGRES_USER: ${DB_GUAC_USERNAME}
     image: postgres:15.2-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_GUAC_USERNAME} -d ${DB_GUAC_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       - init-guacamole-db
     ports:
@@ -97,7 +102,7 @@ services:
     container_name: nginx_guacamole_compose
     image: nginx:alpine
     ports:
-      - "${SERVER_IP}:8080:80/tcp"
+      - "${SERVER_IP}:${NGINX_GUAC_PORT}:80/tcp"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
@@ -106,33 +111,35 @@ services:
       - guacamole
     restart: always
 
-  # backend:
-  #   build:
-  #     context: .
-  #     dockerfile: ./tic-tac-toe-server/Dockerfile
-  #   ports:
-  #     - "${SERVER_IP}:${SERVER_PORT}:${SERVER_PORT}"
-  #   environment:
-  #     DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   command: >
-  #     sh -c "echo 'Waiting for PostgreSQL to be ready...';
-  #     psql -h postgres -U $${DB_USERNAME} -d $${DB_NAME} -c 'SELECT 1'
-  #     echo 'Running migrations...';
-  #     migrate -path /app/internal/schema -database \"$${DATABASE_URL}\" up;
-  #     echo 'Starting application...';
-  #     exec ./tic-tac-toe-server"    
+  backend:
+    build:
+      context: .
+      dockerfile: ./remote-desktop-server/Dockerfile
+    ports:
+      - "${SERVER_IP}:${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+    depends_on:
+      postgres_guac:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "echo 'Waiting for PostgreSQL to be ready...';
+      psql -h postgres -U $${DB_USERNAME} -d $${DB_NAME} -c 'SELECT 1'
+      echo 'Running migrations...';
+      migrate -path /app/internal/schema -database \"$${DATABASE_URL}\" up;
+      echo 'Starting application...';
+      exec ./remote-desktop-server"    
 
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: ./tic-tac-toe-game-ui/Dockerfile
-  #   depends_on:
-  #     - backend
-  #   ports:
-  #     - "${SERVER_IP}:${VITE_PORT}:80"
+  frontend:
+    build:
+      context: .
+      dockerfile: ./remote-desktop-ui/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "${SERVER_IP}:${VITE_PORT}:80"
 
 volumes:
   postgres_data:

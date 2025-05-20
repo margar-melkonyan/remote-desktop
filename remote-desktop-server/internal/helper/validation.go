@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/iancoleman/strcase"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/lang/eng"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/lang/ru"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/lang/eng"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/lang/ru"
 )
 
 func getValidationMessages(locale string) map[string]string {

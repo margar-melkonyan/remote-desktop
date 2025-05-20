@@ -4,11 +4,11 @@ FROM node:18-alpine as builder
 WORKDIR /app
 
 # Копируем зависимости для кэширования
-COPY tic-tac-toe-game-ui/package*.json ./
+COPY remote-desktop-ui/package*.json ./
 RUN npm ci
 
 # Копируем исходный код
-COPY tic-tac-toe-game-ui/ .
+COPY remote-desktop-ui/ .
 
 # Собираем приложение
 RUN  npm run build:no-check
@@ -17,7 +17,7 @@ RUN  npm run build:no-check
 FROM nginx:1.25-alpine
 
 # Копируем конфиг nginx
-COPY tic-tac-toe-game-ui/nginx.conf /etc/nginx/conf.d/default.conf
+COPY remote-desktop-ui/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Копируем собранные файлы из builder-стадии
 COPY --from=builder /app/dist /usr/share/nginx/html

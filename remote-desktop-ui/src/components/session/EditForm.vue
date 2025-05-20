@@ -118,7 +118,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'close'
+  'close',
+  'updateConnections'
 ])
 
 const form = ref(
@@ -144,6 +145,7 @@ const updateConnection = () => {
   })
     .then(() => {
       emit('close')
+      emit('updateConnections')
     })
 }
 

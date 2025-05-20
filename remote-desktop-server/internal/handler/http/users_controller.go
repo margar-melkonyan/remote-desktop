@@ -4,8 +4,8 @@ package http_handler
 import (
 	"net/http"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/helper"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/helper"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/service"
 )
 
 // UserHandler обрабатывает HTTP запросы, связанные с пользователями

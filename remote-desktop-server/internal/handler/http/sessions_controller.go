@@ -1,5 +1,4 @@
-// Package handler предоставляет HTTP обработчики для работы с подключениями Guacamole.
-// Реализует RESTful API для управления подключениями (создание, чтение, обновление, удаление).
+// Package http_handler предоставляет HTTP обработчики для API RemoteDesktop.
 package http_handler
 
 import (
@@ -10,9 +9,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/helper"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/helper"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/service"
 )
 
 // SessionHandler обрабатывает HTTP запросы для работы с подключениями.
@@ -63,7 +62,7 @@ func (h *SessionHandler) Get(w http.ResponseWriter, r *http.Request) {
 // Edit возвращает информацию о конкретном подключении.
 func (h *SessionHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	resp := helper.Response{}
-	id := chi.URLParam(r, "id")
+	id := chi.URLParamFromCtx(r.Context(), "id")
 	if id == "" {
 		resp.Message = "ID is required"
 		resp.ResponseWrite(w, r, http.StatusBadRequest)

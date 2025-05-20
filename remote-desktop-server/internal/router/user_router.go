@@ -2,7 +2,7 @@
 package router
 
 import (
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 // usersRouterGroup регистрирует маршруты для работы с пользователями

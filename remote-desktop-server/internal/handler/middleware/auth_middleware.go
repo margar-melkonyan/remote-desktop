@@ -8,10 +8,10 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common/dependency"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/helper"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/service"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common/dependency"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/helper"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/service"
 )
 
 // responseWriterWrapper оборачивает http.ResponseWriter для добавления

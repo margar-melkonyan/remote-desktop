@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/repository"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/common"
+	"github.com/margar-melkonyan/remote-desktop.git/internal/repository"
 )
 
 // UserService предоставляет методы для получения информации о пользователе.
