@@ -11,6 +11,7 @@ type GuacamoleUser struct {
 }
 
 type GuacamoleConnectionRequest struct {
+	Id         string `json:"identifier,omitempty"`
 	Name       string `json:"name" validate:"required,min=4,max=255"`
 	HostName   string `json:"host_name" validate:"required,min=4,max=255"` // ip or url
 	Username   string `json:"username" validate:"required,min=4,max=255"`

@@ -86,7 +86,7 @@ func NewAppDependencies() *AppDependencies {
 	// Инициализация сервисов
 	userService := service.NewUserService(userRepo)
 	authService := service.NewAuthService(userRepo, guacRepo)
-	sessionService := service.NewSessionService(userRepo)
+	sessionService := service.NewSessionService()
 	// Создание обработчиков
 	userHandler := http_handler.NewUserHandler(*userService)
 	authHandler := http_handler.NewAuthHandler(*authService)

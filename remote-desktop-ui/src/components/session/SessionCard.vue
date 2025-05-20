@@ -1,6 +1,6 @@
 <template>
   <v-card
-    class="mb-8"
+    class="my-4"
     rounded="xl"
   >
     <v-card-title class="mt-2">
@@ -23,10 +23,13 @@
               class="mr-4"
               icon="mdi-pencil"
               color="primary"
+              size="small"
+              @click="sendEdit"
             />
             <v-btn
               icon="mdi-trash-can"
               color="red"
+              size="small"
               @click="openConfirmationDialog"
             />
           </div>
@@ -34,8 +37,8 @@
       </v-row>
     </v-card-title>
     <v-divider class="my-2" />
-    <v-card-actions>
-      <v-row class="d-flex justify-space-between px-5 my-2">
+    <v-card-actions class="mb-2">
+      <v-row class="d-flex justify-space-between px-5">
         <div class="align-self-center">
           {{ $t("connections.protocol", [props.session.protocol]) }}
         </div>
@@ -56,28 +59,37 @@
     persistent
     scrollable
   >
-    <v-card>
+    <v-card
+      rounded="xl"
+      class="py-3"
+    >
       <v-card-title>
         <span style="color: red;">
           {{ $t('connections.caution') }}
         </span>
       </v-card-title>
+      <v-divider />
       <v-card-text>
         {{ $t('connections.cautions.delete') }}
       </v-card-text>
-      <v-card-actions>
+      <v-divider />
+      <v-card-actions class="mt-3">
         <v-row
-          class="d-flex justify-space-between"
+          class="d-flex justify-space-between px-3"
           no-gutters
         >
           <v-btn
             color="primary"
+            variant="tonal"
+            rounded="xl"
             @click="confirmationDialog = false"
           >
             {{ $t('close') }}
           </v-btn>
           <v-btn
             color="red"
+            variant="tonal"
+            rounded="xl"
             @click="confirmDeletion"
           >
             {{ $t('delete') }}
@@ -130,5 +142,13 @@ const confirmDeletion = () => {
       confirmationDialog.value = false;
       emit('updateConnections')
     });
+}
+
+const sendEdit = () => {
+  axios.get(apiSessions.urls.edit(props.session.identifier), {
+    headers: {
+      "Guacamole-Token": localStorage.getItem("guac_token"),
+    },
+  })
 }
 </script>

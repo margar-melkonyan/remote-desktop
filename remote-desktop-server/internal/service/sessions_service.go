@@ -12,7 +12,6 @@ import (
 
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/common"
 	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/config"
-	"github.com/margar-melkonyan/tic-tac-toe-game/tic-tac-toe.git/internal/repository"
 )
 
 // Протоколы по названия которых будут возвращаться подключения
@@ -22,9 +21,14 @@ const (
 	rdp = "rdp"
 )
 
+const (
+	indexURL       = "session/data/postgresql/connectionGroups/ROOT/tree"
+	connectionsURL = "session/data/postgresql/connections"
+)
+
 // SessionService предоставляет сервис для работы c подключениями к удаленным серверам.
 type SessionService struct {
-	repo repository.UserRepository
+	client http.Client
 }
 
 // NewSessionService создает новый экземпляр SessionService.
@@ -34,68 +38,97 @@ type SessionService struct {
 //
 // Возвращает:
 //   - *SessionService: указатель на созданный сервис
-func NewSessionService(repo repository.UserRepository) *SessionService {
+func NewSessionService() *SessionService {
 	return &SessionService{
-		repo: repo,
+		client: http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
 
-func fetchConnections(guacToken string) ([]*common.GuacamoleRDConnectionResponse, error) {
-	getSesions := fmt.Sprintf(
-		"%s/%s",
-		config.ServerConfig.GuacamoleAPIURL,
-		"session/data/postgresql/connectionGroups/ROOT/tree",
-	)
-	req, err := http.NewRequest(http.MethodGet, getSesions, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Guacamole-Token", strings.TrimSpace(guacToken))
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
-	}
+func (service *SessionService) fetchConnections(guacToken string) ([]*common.GuacamoleRDConnectionResponse, error) {
 	var response struct {
 		ChildConnections []*common.GuacamoleRDConnectionResponse `json:"childConnections"`
 	}
-	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, err
+
+	if err := service.makeGuacamoleRequest(
+		http.MethodGet,
+		indexURL,
+		guacToken,
+		nil,
+		&response,
+	); err != nil {
+		return nil, fmt.Errorf("failed to fetch connections: %w", err)
 	}
+
 	return response.ChildConnections, nil
 }
 
 func (service *SessionService) GetSession(protocol string, guacToken string) ([]*common.GuacamoleRDConnectionResponse, error) {
-	connections, err := fetchConnections(guacToken)
-	if protocol == all {
-		return connections, err
+	connections, err := service.fetchConnections(guacToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
-	var resultConnection []*common.GuacamoleRDConnectionResponse
-	resultConnection = make([]*common.GuacamoleRDConnectionResponse, 0)
-	for _, connection := range connections {
-		if connection.Protocol == protocol {
-			resultConnection = append(resultConnection, connection)
+
+	if protocol == all {
+		return connections, nil
+	}
+
+	result := make([]*common.GuacamoleRDConnectionResponse, 0, len(connections))
+	for _, conn := range connections {
+		if conn.Protocol == string(protocol) {
+			result = append(result, conn)
 		}
 	}
 
-	return resultConnection, err
+	return result, nil
+}
+
+func (service *SessionService) EditConnection(id string, guacToken string) (*common.GuacamoleConnectionRequest, error) {
+	// Получаем параметры соединения
+	var params common.Parameters
+	if err := service.makeGuacamoleRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s/%s/parameters", connectionsURL, id),
+		guacToken,
+		nil,
+		&params,
+	); err != nil {
+		return nil, fmt.Errorf("failed to get connection parameters: %w", err)
+	}
+
+	// Получаем основную информацию о соединении
+	var connectionInfo common.GuacamoleRDConnectionRequest
+	if err := service.makeGuacamoleRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s/%s", connectionsURL, id),
+		guacToken,
+		nil,
+		&connectionInfo,
+	); err != nil {
+		return nil, fmt.Errorf("failed to get connection info: %w", err)
+	}
+
+	// Объединяем результаты
+	connectionInfo.Parameters = params
+	return &common.GuacamoleConnectionRequest{
+		Id:       connectionInfo.Id,
+		Name:     connectionInfo.Name,
+		HostName: connectionInfo.Parameters.HostName,
+		Username: connectionInfo.Parameters.Username,
+		Password: connectionInfo.Parameters.Password,
+		Port:     connectionInfo.Port,
+		Protocol: connectionInfo.Protocol,
+	}, nil
 }
 
 func (service *SessionService) CreateConnection(form *common.GuacamoleConnectionRequest, guacToken string) error {
 	ignoreCert := "false"
-
 	if form.Protocol == rdp {
 		ignoreCert = "true"
 	}
 
-	body := common.GuacamoleRDConnectionRequest{
+	requestBody := common.GuacamoleRDConnectionRequest{
 		Name:             form.Name,
 		Protocol:         form.Protocol,
 		ParentIdentifier: "ROOT",
@@ -108,62 +141,80 @@ func (service *SessionService) CreateConnection(form *common.GuacamoleConnection
 		},
 	}
 
-	bodyJson, err := json.Marshal(body)
-	if err != nil {
-		return fmt.Errorf("JSON marshaling failed: %w", err)
+	if err := service.makeGuacamoleRequest(
+		http.MethodPost,
+		connectionsURL,
+		guacToken,
+		requestBody,
+		nil,
+	); err != nil {
+		return fmt.Errorf("failed to create connection: %w", err)
 	}
 
-	reader := bytes.NewReader(bodyJson)
-	getSesions := fmt.Sprintf(
-		"%s/%s",
-		config.ServerConfig.GuacamoleAPIURL,
-		"session/data/postgresql/connections",
-	)
-	req, err := http.NewRequest(http.MethodPost, getSesions, reader)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("Guacamole-Token", strings.TrimSpace(guacToken))
-	req.Header.Add("Content-Type", "application/json;charset=utf-8")
-	client := http.Client{
-		Timeout: 10 * time.Second,
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
-	}
 	return nil
 }
 
 func (service *SessionService) DestroyConnection(id string, guacToken string) error {
-	getSesions := fmt.Sprintf(
-		"%s/%s/%s",
-		config.ServerConfig.GuacamoleAPIURL,
-		"session/data/postgresql/connections",
-		id,
-	)
-	req, err := http.NewRequest(http.MethodDelete, getSesions, nil)
-	if err != nil {
-		return err
+	path := fmt.Sprintf("%s/%s", connectionsURL, id)
+
+	if err := service.makeGuacamoleRequest(
+		http.MethodDelete,
+		path,
+		guacToken,
+		nil,
+		nil,
+	); err != nil {
+		return fmt.Errorf("failed to destroy connection: %w", err)
 	}
+
+	return nil
+}
+
+// makeGuacamoleRequest универсальная функция для выполнения запросов к Guacamole API
+func (service *SessionService) makeGuacamoleRequest(
+	method string,
+	path string,
+	guacToken string,
+	requestBody interface{},
+	responseTarget interface{},
+) error {
+	url := fmt.Sprintf("%s/%s", config.ServerConfig.GuacamoleAPIURL, path)
+
+	var body io.Reader
+	if requestBody != nil {
+		jsonData, err := json.Marshal(requestBody)
+		if err != nil {
+			return fmt.Errorf("failed to marshal request body: %w", err)
+		}
+		body = bytes.NewReader(jsonData)
+	}
+
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
 	req.Header.Add("Guacamole-Token", strings.TrimSpace(guacToken))
-	req.Header.Add("Content-Type", "application/json;charset=utf-8")
-	client := http.Client{
-		Timeout: 10 * time.Second,
+	if body != nil {
+		req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	}
-	resp, err := client.Do(req)
+
+	resp, err := service.client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+		errorBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(errorBody))
 	}
+
+	if responseTarget != nil {
+		if err := json.NewDecoder(resp.Body).Decode(responseTarget); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
 	return nil
 }

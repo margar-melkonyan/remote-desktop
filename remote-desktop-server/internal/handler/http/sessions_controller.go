@@ -56,6 +56,29 @@ func (h *SessionHandler) Get(w http.ResponseWriter, r *http.Request) {
 	resp.ResponseWrite(w, r, http.StatusOK)
 }
 
+func (h *SessionHandler) Eidt(w http.ResponseWriter, r *http.Request) {
+	resp := helper.Response{}
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		resp.Message = "ID is required"
+		resp.ResponseWrite(w, r, http.StatusBadRequest)
+		return
+	}
+	guacToken := r.Header.Get("Guacamole-Token")
+	if guacToken == "" {
+		resp.Message = "Guacamole-Token is required"
+		resp.ResponseWrite(w, r, http.StatusBadRequest)
+		return
+	}
+	data, err := h.service.EditConnection(id, guacToken)
+	if err != nil {
+		resp.ResponseWrite(w, r, http.StatusNotFound)
+		return
+	}
+	resp.Data = data
+	resp.ResponseWrite(w, r, http.StatusOK)
+}
+
 func (h *SessionHandler) StoreConnection(w http.ResponseWriter, r *http.Request) {
 	var resp helper.Response
 	guacToken := r.Header.Get("Guacamole-Token")
