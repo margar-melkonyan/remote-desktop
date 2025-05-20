@@ -9,7 +9,7 @@ RUN go mod download
 COPY remote-desktop-server/ .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o remote-desktop-server ./cmd
-COPY ./.env .
+COPY ./.env /app/.env
 
 RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 RUN apt-get update && apt-get install -y \
