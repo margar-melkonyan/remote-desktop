@@ -10,6 +10,8 @@ RUN npm ci
 # Копируем исходный код
 COPY remote-desktop-ui/ .
 
+COPY .env /app/.env
+
 # Собираем приложение
 RUN  npm run build:no-check
 
