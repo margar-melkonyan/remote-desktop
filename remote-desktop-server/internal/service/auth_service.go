@@ -237,7 +237,11 @@ func getGuacamoleToken(form common.AuthSignInRequest) (string, error) {
 	formData.Set("username", form.Email)
 	formData.Set("password", form.Password)
 	resp, err := http.Post(
-		config.ServerConfig.GuacamoleAPIURL+"/tokens",
+		fmt.Sprintf(
+			"%s/%s",
+			config.ServerConfig.GuacamoleAPIURL,
+			"tokens",
+		),
 		"application/x-www-form-urlencoded",
 		strings.NewReader(formData.Encode()),
 	)

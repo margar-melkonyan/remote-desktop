@@ -43,7 +43,8 @@ func (stroage *Storage) NewConnection(dsn string) (*sql.DB, error) {
 	}
 	if err = db.Ping(); err != nil {
 		return nil, fmt.Errorf(
-			"the application cannot connect to the database",
+			"the application cannot connect to the database url: %s",
+			dsn,
 		)
 	}
 	return db, nil
